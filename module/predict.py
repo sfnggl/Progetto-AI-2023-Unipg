@@ -1,5 +1,9 @@
+from re import X
 import cv2 as cv
 from google.colab.patches import cv2_imshow
+import os
+import numpy as np
+
 
 def close_enough_linear(prob_array, labels):
   prob_array=np.asarray(prob_array)
@@ -56,44 +60,27 @@ def cleandata(data, probabilities, labels):
     
 def predict():
 	#carico le celle della griglia sul modello
-
-	dir=sys.path[0]
-	path="/output/"
 	i,width,height=0,0,0
 	data=[]
+	folder = os.listdir("/content/output/")
+	folder.sort(key=lambda x: int(x))
 
-	!cd output/ && ls > path1
+	height = max([int(x[:1]) for x in folder]) + 1
+	width = max([int(x[1:]) for x in folder]) + 1
+	
+  #import image in dir
+	for filename in folder:
+		imaget = cv.imread("output/"+filename, flags= cv.IMREAD_GRAYSCALE)
+		imaget = cv.bitwise_not(imaget)
+		imaget= imaget.reshape(28,28)
+		cv2_imshow(imaget)
+		#Normalizzo le immagini
+		#shape image as single array
+		imaget=imaget.reshape(1, 784)
+		imaget= imaget.astype("float32")/255
+		data.append(imaget)
 
-	#import image in dir
-	with open((dir + path + "path1")) as file:
-		for line in file.readlines():
-		  keyword=line.rstrip()
-		  if (keyword != "path1" and
-		      keyword != "file.jpg" and
-		      keyword != "finalimg.jpg" and
-		      keyword != "photo.jpg"):
-		    i+=1
-		    filename=dir+path+keyword
-		    if(filename[(len(filename)-6):(len(filename)-4)] == "10"):
-		      #first row
-		      width = i-1
-		    print(filename)
-		    imaget = cv.imread(filename, flags= cv.IMREAD_GRAYSCALE)
-		    imaget = cv.bitwise_not(imaget)
-		    imaget= imaget.reshape(28,28)
-		    cv2_imshow(imaget)
-
-		    #Normalizzo le immagini
-		    #shape image as single array
-		    imaget=imaget.reshape(1, 784)
-		    imaget= imaget.astype("float32")/255
-		    data.append(imaget)
-
-	print(filename[(len(filename)- 6):(len(filename)- 4)])
-
-	height = i//width
-
-	print(f"width: {width}\nheight: {height:0.0f}")
+	print(f"width: {width}, height:{height}")
 	
 	probabilities, labels = get_prob_array(bgty_model, data)
 
