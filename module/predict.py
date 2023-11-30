@@ -98,4 +98,4 @@ def predict(f_input, bgty_model):
 	
 	cleanup = [cleanup[a] for a in range(0,len(cleanup))]
 	cleanup += [cleanup.index(0)]
-	return cleanup
+	return cleanup, width, height
