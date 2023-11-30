@@ -1,4 +1,3 @@
-from re import X
 import cv2 as cv
 from google.colab.patches import cv2_imshow
 import os
@@ -58,22 +57,22 @@ def get_prob_array(model, data):
 def cleandata(data, probabilities, labels):
   return ttt_out(data, close_enough_linear(probabilities, labels))
     
-def predict():
+def predict(f_input, bgty_model):
 	#carico le celle della griglia sul modello
 	i,width,height=0,0,0
 	data=[]
-	folder = os.listdir("/content/output/")
+	folder = os.listdir(f_input)
+	folder = [os.path.splitext(x)[0] for x in folder]
 	folder.sort(key=lambda x: int(x))
 
 	height = max([int(x[:1]) for x in folder]) + 1
 	width = max([int(x[1:]) for x in folder]) + 1
 	
-  #import image in dir
 	for filename in folder:
-		imaget = cv.imread("output/"+filename, flags= cv.IMREAD_GRAYSCALE)
+		imaget = cv.imread("output/"+filename+".jpg", flags= cv.IMREAD_GRAYSCALE)
 		imaget = cv.bitwise_not(imaget)
 		imaget= imaget.reshape(28,28)
-		cv2_imshow(imaget)
+		#cv2_imshow(imaget)
 		#Normalizzo le immagini
 		#shape image as single array
 		imaget=imaget.reshape(1, 784)
@@ -84,18 +83,19 @@ def predict():
 	
 	probabilities, labels = get_prob_array(bgty_model, data)
 
-	for k in range(len(labels)):
-		print(f"{probabilities[k]}")
-	print(np.asarray(probabilities).shape)
-	print(np.asarray(probabilities).ndim)
-	print(labels)
+	#for k in range(len(labels)):
+	#	print(f"{probabilities[k]}")
+	#print(np.asarray(probabilities).shape)
+	#print(np.asarray(probabilities).ndim)
+	#print(labels)
 	#passo le previsioni, dati e modello per ricavare il mio output
 	#finale
 
 	cleanup = cleandata(labels, probabilities, labels)
-
-	print(f"l'array finale è {cleanup}")
+	
+	print(f"width: {width}, height:{height}")
+	print(f"Final array: {cleanup}")
 	
 	cleanup = [cleanup[a] for a in range(0,len(cleanup))]
 	cleanup += [cleanup.index(0)]
-	cleanup
+	return cleanup
